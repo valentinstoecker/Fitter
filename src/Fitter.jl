@@ -650,7 +650,7 @@ callback!(
   y = data[:y]
   y_int = data[:y_int]
   df = DataFrame(x=x, y=y, y_integrated=y_int)
-  csv = CSV.write(IOBuffer(), df)
+  csv = CSV.write(IOBuffer(), df, delim='\t')
   Dict([:content => String(take!(csv)), :filename => "residual.csv"])
 end
 
@@ -706,7 +706,7 @@ callback!(
   x = data[:x]
   y = data[:y]
   df = DataFrame(frequency=x, psd=y)
-  csv = CSV.write(IOBuffer(), df)
+  csv = CSV.write(IOBuffer(), df, delim='\t')
   Dict([:content => String(take!(csv)), :filename => "psd-residual-$count-windows.csv"])
 end
 
