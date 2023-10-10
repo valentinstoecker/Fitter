@@ -1,0 +1,79 @@
+* {
+  font-family: Helvetica, Arial, sans-serif;
+}
+
+.content {
+  margin: 20px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  text-align: center;
+}
+
+.drag-n-drop {
+  border: 2px dashed #ccc;
+  border-radius: 20px;
+  padding: 20px;
+  text-align: center;
+  background-color: #0001;
+  margin: 1em;
+}
+
+.select-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-gap: 10px;
+  max-width: 50em;
+  margin: auto;
+  background-color: #eee;
+  padding: 20px;
+}
+
+.param-grid {
+  display: grid;
+  grid-template-columns: auto 1fr 1fr 1fr;
+  grid-gap: 10px;
+  max-width: 50em;
+  margin: auto;
+  background-color: #eee;
+  padding: 20px;
+}
+
+.fit-button {
+  grid-column: 1/4;
+  padding: 5px;
+  font-size: large;
+  background-color: #0001;
+  border: solid 1px #ccc;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.fit-button:hover {
+  background-color: #0002;
+}
+
+input {
+  padding: 5px;
+  background-color: #0001;
+  border: solid 1px #ccc;
+  border-radius: 5px;
+  font-size: medium;
+}
+
+.dash-dropdown {
+  display: inline-block;
+  vertical-align: middle;
+  width: 100%;
+}
+.Select-control {
+  background-color: #0001;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: max-content max-content;
+  grid-gap: 10px;
+  margin-left: 2em;
+  margin-right: auto;
+}
