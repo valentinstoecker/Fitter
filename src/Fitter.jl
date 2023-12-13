@@ -365,9 +365,7 @@ callback!(
   Output("raw-data-store", "data"),
   Input("upload-data", "contents"),
   Input("data-column", "value"),
-  State("upload-data", "filename"),
-  State("upload-data", "last_modified"),
-) do contents, column, filename, last_modified
+) do contents, column
   x = []
   y = []
   if !(contents isa Nothing)
