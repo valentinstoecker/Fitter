@@ -34,16 +34,14 @@ function open_in_default_browser(url::AbstractString)::Bool
   end
 end
 
-function import_file(text, data_field, xi, yi)
-  split_text = split(text, "#")
-  function to_pair(segment)
-    parts = split(segment,":",limit=2)
-    (strip(parts[1]), strip(parts[2]))
-  end
-  data = Dict(map(to_pair, split_text[3:end]))
+function import_file(text, xi, yi)
+  lines = split(text, "\n")
   readings = Dict()
-  lines = split(data[data_field], "\n")
   for l ∈ lines
+    l = strip(l)
+    if length(l) == 0 || startswith(l, "#")
+      continue
+    end
     vals = split(l)
     x = parse(Float64, vals[xi])
     y = parse(Float64, vals[yi])
@@ -370,7 +368,7 @@ callback!(
   y = []
   if !(contents isa Nothing)
     text = String(base64decode(split(contents,",")[2]))
-    data = import_file(text, "Fit-Info", 1, column)
+    data = import_file(text, 1, column)
     x = data[:,1]
     y = data[:,2]
   end
