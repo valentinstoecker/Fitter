@@ -1,1 +1,1 @@
-julia --project=. -e "using Fitter; Fitter.run()"
+julia .\src\Run.jl
