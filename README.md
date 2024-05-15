@@ -4,5 +4,5 @@
 - a working julia installation
 
 ## Starting
-run `julia --project=. -e "using Fitter; Fitter.run()"`
+run `julia src/Run.jl"`
 or use the provided scripts
