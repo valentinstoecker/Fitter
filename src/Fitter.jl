@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.35
+# v0.19.42
 
 using Markdown
 using InteractiveUtils
@@ -68,7 +68,7 @@ end
 # ╔═╡ e0b06662-c7e3-44c0-95e8-309125e85009
 md"""
 ## Fit
-curve-type: $(@bind curve_type Select(["ellipse", "parabola"]))
+curve-type: $(@bind curve_type Select(["ellipse", "parabola", "polynomial"]))
 """
 
 # ╔═╡ 807d8f86-4c2a-4acf-8a0f-e89399c9328c
@@ -85,6 +85,10 @@ elseif curve_type == "parabola"
 	θ in °: $(@bind θ_text TextField()) Δθ in °: $(@bind ΔR_text TextField())\
 	Δα in °: $(@bind Δα_text TextField()) calculate: $(@bind calculate CheckBox())
 	"""
+elseif curve_type == "polynomial"
+	md"""
+	order: $(@bind p_order TextField())
+	"""
 end
 
 # ╔═╡ 893c06e1-a7ef-4159-aee8-c637ef4ba939
@@ -98,6 +102,14 @@ md"""
 window count: $(@bind window_count NumberField(1:100))
 logarithmic x: $(@bind x_log CheckBox(default=true))
 """
+
+# ╔═╡ 9383cecf-dcfc-4121-a6b9-0eac29934502
+if curve_type == "polynomial"
+	md"""
+	### Polynomial
+	coordinate system: $(@bind coord_system Select(["original", "origin"]))
+	"""
+end
 
 # ╔═╡ 51a39cb8-c130-4f8a-9789-8e4bb358353d
 begin
@@ -164,6 +176,21 @@ begin
 		l: $(l_fit) mm θ: $(θ_fit) ° α: $(α_fit) °\
 		rms: $(√(mean(xₑ.^2)))
 		"""
+	elseif curve_type == "polynomial"
+		n = parse(Int64, p_order)
+		x = x_trimmed .- mean(x_trimmed)
+		y = y_trimmed
+		A = zeros(length(x_trimmed), n + 1)
+		for i ∈ 1:length(x), j ∈ 1:(n+1)
+			A[i, j] = x[i]^(j - 1)
+		end
+		coeffs = (A' * A)\(A'*y)
+		f_poly(x) = evalpoly(x, coeffs)
+		y_poly = f_poly.(x)
+		xₑ = y_trimmed - y_poly
+		md"""
+		rms: $(√(mean(xₑ.^2)))
+		"""
 	end
 end
 
@@ -202,6 +229,21 @@ begin
 		$button_h5
 		"""
 	end
+
+	function translatePoly(p, o)
+		n = length(p) - 1
+		p_n = zeros(length(p))
+		for k ∈ 0:n
+			cₖ = 0
+			for i ∈ k:n
+				cᵢ = p[i + 1]
+				cₖ += binomial(i,k)*cᵢ*o^(i-k)
+			end
+			p_n[k + 1] = cₖ
+		end
+		p_n
+	end
+	
 	md"utils"
 end
 
@@ -217,9 +259,19 @@ begin
 	downloadDF(psd_df, "$(filename)_psd_$(window_count)_windows")
 end
 
+# ╔═╡ f4b890ff-861b-4bda-a545-7b958d8b1691
+if curve_type == "polynomial"
+	df = if coord_system == "origin"
+		DataFrame(coefficients=collect(reverse(coeffs)))
+	else
+		DataFrame(coefficients=collect(reverse(translatePoly(coeffs, -mean(x_trimmed)))))
+	end
+	downloadDF(df, "$(filename)_polynomial_$(n)th-order")
+end
+
 # ╔═╡ Cell order:
-# ╠═d239df4b-23c0-4d19-8064-97d6290e0797
-# ╠═1e43bbfd-edbf-4b9d-bceb-7837848ff43e
+# ╟─d239df4b-23c0-4d19-8064-97d6290e0797
+# ╟─1e43bbfd-edbf-4b9d-bceb-7837848ff43e
 # ╟─534352c9-9683-465d-8c84-7aa21362d22a
 # ╟─2d495998-ef4b-4622-a9b6-b2087861066e
 # ╟─2f470b07-d941-4a91-8f80-2008a4613e27
@@ -232,6 +284,8 @@ end
 # ╟─f39b8547-566d-443a-bdaa-d60aaa97a6d8
 # ╟─7bdcc3a2-3082-4b16-b62b-20ecc013d6b3
 # ╟─e7c68ba4-c602-4198-9797-9aa7bb2c58d6
+# ╟─9383cecf-dcfc-4121-a6b9-0eac29934502
+# ╟─f4b890ff-861b-4bda-a545-7b958d8b1691
 # ╟─cd186284-fcb4-11ee-3829-c5cd8418f889
 # ╟─51a39cb8-c130-4f8a-9789-8e4bb358353d
 # ╟─d14d40f9-27ee-493d-b854-e59fd2f5a2d9
