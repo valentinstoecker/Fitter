@@ -103,11 +103,29 @@ window count: $(@bind window_count NumberField(1:100))
 logarithmic x: $(@bind x_log CheckBox(default=true))
 """
 
+# ╔═╡ 206c8337-14bf-4ca7-9d3c-3f51a31e4c61
+md"""
+### Polynomial
+
+#### Coefficients
+
+The coefficients describe the fitted polynomial where x = 0 is the center of the measured section. The first element of the coefficient list is the factor of the term with the highest order.
+"""
+
+# ╔═╡ d4d00d7f-9936-49c7-a66e-6673dfbd3a96
+md"#### Excel Formula"
+
+# ╔═╡ 5acdb46e-8984-454c-8d8b-f0b398628527
+md"""
+cell name: $(@bind cell_ref TextField())
+
+decimal seperator: $(@bind ds Select([", (comma)", ". (dot)"]))
+"""
+
 # ╔═╡ 9383cecf-dcfc-4121-a6b9-0eac29934502
 if curve_type == "polynomial"
 	md"""
-	### Polynomial
-	coordinate system: $(@bind coord_system Select(["original", "origin"]))
+	coordinate system: $(@bind coord_system Select(["origin", "original"]))
 	"""
 end
 
@@ -230,18 +248,39 @@ begin
 		"""
 	end
 
+	# Kahan summation algorithm
+	function Base.sum(xs :: AbstractArray{Float64})
+		s = 0
+		c = 0
+		for x ∈ xs
+			y = x - c
+			t = s + y
+			c = (t - s) - y
+			s = t
+		end
+		return s
+	end
+
 	function translatePoly(p, o)
 		n = length(p) - 1
 		p_n = zeros(length(p))
 		for k ∈ 0:n
-			cₖ = 0
+			cs = zeros(n - k + 1)
 			for i ∈ k:n
 				cᵢ = p[i + 1]
-				cₖ += binomial(i,k)*cᵢ*o^(i-k)
+				cs[i - k + 1] = binomial(i,k)*cᵢ*o^(i-k)
 			end
-			p_n[k + 1] = cₖ
+			p_n[k + 1] = sum(cs)
 		end
 		p_n
+	end
+
+	function coeffsToExcel(coeffs, cell = "A1", offset = 0)
+		s = "0"
+		for c ∈ reverse(coeffs)
+			s = "(($cell + $offset)*$s + $c)"
+		end
+		return s
 	end
 	
 	md"utils"
@@ -269,6 +308,19 @@ if curve_type == "polynomial"
 	downloadDF(df, "$(filename)_polynomial_$(n)th-order")
 end
 
+# ╔═╡ 8b4665f6-9604-4418-b123-fe221f33ba9e
+begin
+	offset = 0
+	if coord_system == "original"
+		offset = -mean(x_trimmed)
+	end
+	s = coeffsToExcel(coeffs, cell_ref, offset)
+	if ds == ", (comma)"
+		s = replace(s, "." => ",", "," => ".")
+	end
+	md"Formula: =$s"
+end
+
 # ╔═╡ Cell order:
 # ╟─d239df4b-23c0-4d19-8064-97d6290e0797
 # ╟─1e43bbfd-edbf-4b9d-bceb-7837848ff43e
@@ -284,8 +336,12 @@ end
 # ╟─f39b8547-566d-443a-bdaa-d60aaa97a6d8
 # ╟─7bdcc3a2-3082-4b16-b62b-20ecc013d6b3
 # ╟─e7c68ba4-c602-4198-9797-9aa7bb2c58d6
-# ╟─9383cecf-dcfc-4121-a6b9-0eac29934502
+# ╟─206c8337-14bf-4ca7-9d3c-3f51a31e4c61
 # ╟─f4b890ff-861b-4bda-a545-7b958d8b1691
+# ╟─d4d00d7f-9936-49c7-a66e-6673dfbd3a96
+# ╟─5acdb46e-8984-454c-8d8b-f0b398628527
+# ╟─9383cecf-dcfc-4121-a6b9-0eac29934502
+# ╟─8b4665f6-9604-4418-b123-fe221f33ba9e
 # ╟─cd186284-fcb4-11ee-3829-c5cd8418f889
 # ╟─51a39cb8-c130-4f8a-9789-8e4bb358353d
 # ╟─d14d40f9-27ee-493d-b854-e59fd2f5a2d9
