@@ -104,23 +104,26 @@ logarithmic x: $(@bind x_log CheckBox(default=true))
 """
 
 # ╔═╡ 206c8337-14bf-4ca7-9d3c-3f51a31e4c61
-md"""
-### Polynomial
-
-#### Coefficients
-
-The coefficients describe the fitted polynomial where x = 0 is the center of the measured section. The first element of the coefficient list is the factor of the term with the highest order.
-"""
-
-# ╔═╡ d4d00d7f-9936-49c7-a66e-6673dfbd3a96
-md"#### Excel Formula"
+if curve_type == "polynomial"
+	md"""
+	### Polynomial
+	
+	#### Coefficients
+	
+	The coefficients describe the fitted polynomial where x = 0 is the center of the measured section. The first element of the coefficient list is the factor of the term with the highest order.
+	"""
+end
 
 # ╔═╡ 5acdb46e-8984-454c-8d8b-f0b398628527
-md"""
-cell name: $(@bind cell_ref TextField())
-
-decimal seperator: $(@bind ds Select([", (comma)", ". (dot)"]))
-"""
+if curve_type == "polynomial"
+	md"""
+	#### Excel Formula
+	
+	cell name: $(@bind cell_ref TextField())
+	
+	decimal seperator: $(@bind ds Select([", (comma)", ". (dot)"]))
+	"""
+end
 
 # ╔═╡ 9383cecf-dcfc-4121-a6b9-0eac29934502
 if curve_type == "polynomial"
@@ -300,16 +303,12 @@ end
 
 # ╔═╡ f4b890ff-861b-4bda-a545-7b958d8b1691
 if curve_type == "polynomial"
-	df = if coord_system == "origin"
-		DataFrame(coefficients=collect(reverse(coeffs)))
-	else
-		DataFrame(coefficients=collect(reverse(translatePoly(coeffs, -mean(x_trimmed)))))
-	end
+	df = DataFrame(coefficients=collect(reverse(coeffs)))
 	downloadDF(df, "$(filename)_polynomial_$(n)th-order")
 end
 
 # ╔═╡ 8b4665f6-9604-4418-b123-fe221f33ba9e
-begin
+if curve_type == "polynomial"
 	offset = 0
 	if coord_system == "original"
 		offset = -mean(x_trimmed)
@@ -338,7 +337,6 @@ end
 # ╟─e7c68ba4-c602-4198-9797-9aa7bb2c58d6
 # ╟─206c8337-14bf-4ca7-9d3c-3f51a31e4c61
 # ╟─f4b890ff-861b-4bda-a545-7b958d8b1691
-# ╟─d4d00d7f-9936-49c7-a66e-6673dfbd3a96
 # ╟─5acdb46e-8984-454c-8d8b-f0b398628527
 # ╟─9383cecf-dcfc-4121-a6b9-0eac29934502
 # ╟─8b4665f6-9604-4418-b123-fe221f33ba9e
